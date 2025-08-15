@@ -318,6 +318,111 @@
         display: none;
       }
 
+      /* ===== Modal (Help/Menu) ===== */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .overlay.show {
+        display: flex;
+      }
+      .modal {
+        width: min(920px, 96vw);
+        max-height: 90vh;
+        overflow: auto;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 16px 16px 18px;
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 900;
+      }
+      .modal-body {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 12px;
+      }
+      .modal-nav {
+        border-right: 1px solid var(--border);
+        padding-right: 12px;
+      }
+      .nav-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 6px;
+        border: 1px solid var(--border);
+        background: var(--option-bg);
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .nav-btn.active {
+        outline: 2px solid var(--primary);
+      }
+      .modal-section {
+        display: none;
+      }
+      .modal-section.active {
+        display: block;
+      }
+      .kbd {
+        display: inline-block;
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        padding: 0 6px;
+        border-radius: 6px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: var(--option-bg);
+      }
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      /* --- Khung ảnh minh họa trong Hướng dẫn nhanh --- */
+      .guide-illustration {
+        border: 2px dashed var(--border);
+        background: var(--option-bg);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+      }
+      .guide-illustration img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+
+      @media (max-width: 820px) {
+        .modal-body {
+          grid-template-columns: 1fr;
+        }
+        .modal-nav {
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+          padding-right: 0;
+          padding-bottom: 8px;
+        }
+      }
       @media (max-width: 560px) {
         h1 {
           font-size: 22px;
@@ -345,6 +450,9 @@
           </div>
         </div>
         <div class="toolbar">
+          <button id="help-btn" class="btn" title="Hướng dẫn & Menu">
+            ❓ Hướng dẫn
+          </button>
           <button
             id="theme-toggle"
             class="btn theme-btn"
@@ -456,35 +564,251 @@
       </footer>
     </div>
 
+    <!-- ===== Modal: Hướng dẫn & Menu ===== -->
+    <div id="help-overlay" class="overlay" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="help-title"
+      >
+        <div class="modal-header">
+          <div class="modal-title" id="help-title">Hướng dẫn & Menu</div>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button id="theme-toggle-modal" class="btn" type="button">
+              🌙 Dark
+            </button>
+            <button class="btn" type="button" onclick="closeHelp()">
+              Đóng ✕
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <nav class="modal-nav">
+            <button class="nav-btn active" data-target="guide-sec">
+              📘 Hướng dẫn nhanh
+            </button>
+            <button class="nav-btn" data-target="modes-sec">
+              🎯 Chế độ chơi
+            </button>
+            <button class="nav-btn" data-target="actions-sec">
+              ⚙️ Tác vụ nhanh
+            </button>
+            <button class="nav-btn" data-target="faq-sec">❓ Lưu ý/FAQ</button>
+          </nav>
+          <section style="padding-left: 4px">
+            <div id="guide-sec" class="modal-section active">
+              <h3>1) Chuẩn bị Google Sheet</h3>
+              <ol>
+                <li>
+                  Tạo google sheet Cột A tiêu đề <b>en</b>, cột B tiêu đề
+                  <b>vn</b> -> Cột A chứa các từ tiếng Anh, cột B chứa nghĩa
+                  tiếng Việt
+                </li>
+                <li>
+                  Mở sheet của bạn → vào <b>Share</b> → bật
+                  <b>Anyone with the link → Viewer</b>.
+                </li>
+                <li>
+                  Copy link của google sheet trên thanh địa chỉ (hoặc nhấn sao
+                  chép đường liên kết tại nút chia sẻ).
+                </li>
+              </ol>
+
+              <h3>2) Dán link vào web</h3>
+              <p>
+                Nhấn <b>Mở khung dán link</b> bên mục <b>Tác vụ nhanh</b> (hoặc
+                cuộn lên phần “Google Sheet”), dán link và bấm <b>Lưu link</b>.
+                Link sẽ được lưu vào <b>trình duyệt</b> (localStorage).
+              </p>
+
+              <h3>3) Bắt đầu chơi</h3>
+              <p>
+                Chọn chế độ EN/VN, Quiz hoặc Flashcard. Dữ liệu cập nhật trực
+                tiếp từ Sheet.
+              </p>
+
+              <!-- KHUNG ẢNH MINH HỌA -->
+              <h3>Ảnh minh họa Sheet</h3>
+              <div class="guide-illustration">
+                <!-- Thay đường dẫn ảnh ở thuộc tính src bên dưới -->
+                <img
+                  id="guide-image"
+                  src="./minhhoa.png"
+                  alt="Ảnh minh họa Google Sheet"
+                />
+              </div>
+            </div>
+
+            <div id="modes-sec" class="modal-section">
+              <h3>Chế độ chơi</h3>
+              <ul>
+                <li>
+                  <b>✍️ EN → VN</b>: Nhập nghĩa tiếng Việt cho từ/cụm tiếng Anh.
+                </li>
+                <li>
+                  <b>✍️ VN → EN</b>: Nhập nghĩa tiếng Anh cho từ/cụm tiếng Việt.
+                </li>
+                <li>
+                  <b>✅ Quiz</b>: Trắc nghiệm. (Lưu ý: các lựa chọn sai, gây
+                  nhiễu sẽ được lấy từ đáp án của những từ khác trong sheet)
+                </li>
+                <li>
+                  <b>🪪 Flashcard</b>: Lật thẻ để xem nghĩa, nhấn “I knew it” để
+                  sang từ mới, nhấn “I forgot” để làm lại.
+                </li>
+              </ul>
+              <p>
+                <b>Phím tắt:</b> <span class="kbd">Enter</span> = Submit/Next,
+                <span class="kbd">Esc</span> = Try Again,
+                <span class="kbd">Space</span> = Lật thẻ.
+              </p>
+            </div>
+
+            <div id="actions-sec" class="modal-section">
+              <h3>Tác vụ nhanh</h3>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button
+                  class="btn primary-btn"
+                  type="button"
+                  onclick="openSheetPanelFromMenu()"
+                >
+                  📄 Mở khung dán link
+                </button>
+                <button class="btn" type="button" onclick="reloadFromSaved()">
+                  🔄 Tải lại dữ liệu
+                </button>
+                <button class="btn" type="button" onclick="scrollToTop()">
+                  ⬆️ Lên đầu trang
+                </button>
+              </div>
+              <p class="note" style="margin-top: 8px">
+                Bạn có thể bật/tắt giao diện tối bằng nút ở góc phải trên của
+                cửa sổ này hoặc nút trên header.
+              </p>
+            </div>
+
+            <div id="faq-sec" class="modal-section">
+              <h3>Lưu ý/FAQ</h3>
+              <ul>
+                <li><b>Định dạng dữ liệu:</b> Cột A = EN, Cột B = VN.</li>
+                <li>
+                  <b>Dòng trống:</b> Nên tránh dòng trống giữa dữ liệu để trải
+                  nghiệm mượt hơn.
+                </li>
+                <li>
+                  <b>Thay đổi Sheet:</b> Dán link mới và bấm <b>Lưu link</b>.
+                </li>
+                <li>
+                  <b>Lưu cục bộ:</b> Link được lưu ở trình duyệt, xóa cache hoặc
+                  “Xóa link đã lưu” để đặt lại.
+                </li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
     <script>
       /* ============== THEME ============== */
-      (function () {
+      function updateThemeButtons() {
+        const dark = document.body.classList.contains("dark");
+        const hdrBtn = document.getElementById("theme-toggle");
+        const mdlBtn = document.getElementById("theme-toggle-modal");
+        if (hdrBtn) {
+          hdrBtn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+          hdrBtn.title = dark ? "Switch to Light" : "Switch to Dark";
+        }
+        if (mdlBtn) mdlBtn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+      }
+      function setTheme(isDark) {
+        document.body.classList.toggle("dark", isDark);
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        updateThemeButtons();
+      }
+      function toggleTheme() {
+        setTheme(!document.body.classList.contains("dark"));
+      }
+      (function initTheme() {
         const saved = localStorage.getItem("theme") || "light";
         if (saved === "dark") document.body.classList.add("dark");
-        const btn = document.getElementById("theme-toggle");
-        const update = () => {
-          const dark = document.body.classList.contains("dark");
-          btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
-          btn.title = dark ? "Switch to Light" : "Switch to Dark";
-        };
-        update();
-        btn.addEventListener("click", () => {
-          document.body.classList.toggle("dark");
-          localStorage.setItem(
-            "theme",
-            document.body.classList.contains("dark") ? "dark" : "light"
-          );
-          update();
+        updateThemeButtons();
+        document
+          .getElementById("theme-toggle")
+          .addEventListener("click", toggleTheme);
+        document.addEventListener("click", (e) => {
+          if (e.target && e.target.id === "theme-toggle-modal") toggleTheme();
         });
       })();
 
+      /* ============== HELP MODAL ============== */
+      const overlay = document.getElementById("help-overlay");
+      document.getElementById("help-btn").addEventListener("click", openHelp);
+      function openHelp() {
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelector('[data-target="guide-sec"]')
+          .classList.add("active");
+        document
+          .querySelectorAll(".modal-section")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById("guide-sec").classList.add("active");
+      }
+      function closeHelp() {
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeHelp();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.classList.contains("show"))
+          closeHelp();
+      });
+      document.addEventListener("click", (e) => {
+        const btn = e.target.closest(".nav-btn");
+        if (!btn) return;
+        const target = btn.getAttribute("data-target");
+        if (!target) return;
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        document
+          .querySelectorAll(".modal-section")
+          .forEach((s) => s.classList.remove("active"));
+        const sec = document.getElementById(target);
+        if (sec) sec.classList.add("active");
+      });
+      function openSheetPanelFromMenu() {
+        const body = document.getElementById("sheet-body");
+        const btn = document.getElementById("sheet-collapse");
+        if (body.classList.contains("collapsed")) {
+          body.classList.remove("collapsed");
+          btn.textContent = "Thu gọn";
+          localStorage.setItem(LS_KEY_COLLAPSED, "0");
+        }
+        document.getElementById("sheet-input").focus();
+        document
+          .querySelector(".card")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+        closeHelp();
+      }
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
       /* ============== SHEET LINK / CSV ============== */
-      const LS_KEY_SOURCE = "sheet_source_link"; // link gốc bạn dán
-      const LS_KEY_COLLAPSED = "sheet_panel_collapsed"; // trạng thái thu gọn
+      const LS_KEY_SOURCE = "sheet_source_link";
+      const LS_KEY_COLLAPSED = "sheet_panel_collapsed";
       let SHEET_ID = null,
         SHEET_GID = "0";
 
-      // Bắt id/gid từ mọi loại link hợp lệ
       function extractIdGid(raw) {
         if (!raw) return null;
         let s = String(raw).trim();
@@ -492,12 +816,9 @@
         try {
           const u = new URL(s);
           if (!/docs\.google\.com$/i.test(u.hostname)) return null;
-
           const m = u.pathname.match(/\/spreadsheets\/d\/([a-zA-Z0-9\-_]+)/);
           if (!m) return null;
           const id = m[1];
-
-          // gid trong query trước, thiếu thì xem hash, cuối cùng mặc định 0
           let gid = u.searchParams.get("gid") || "0";
           if (gid === "0" && u.hash) {
             const m2 = u.hash.match(/gid=(\d+)/);
@@ -508,26 +829,20 @@
           return null;
         }
       }
-
-      // Tạo URL CSV export (tránh ép kiểu cột)
       function buildCsvUrl(id, gid) {
         const u = new URL(
           `https://docs.google.com/spreadsheets/d/${id}/export`
         );
         u.searchParams.set("format", "csv");
         u.searchParams.set("gid", gid || "0");
-        // cache-busting
         u.searchParams.set("_", Date.now().toString());
         return u.toString();
       }
-
-      // Cập nhật UI khối cấu hình
       function updateSheetUI() {
         const savedSrc = localStorage.getItem(LS_KEY_SOURCE);
         const status = document.getElementById("sheet-status");
         const input = document.getElementById("sheet-input");
         const preview = document.getElementById("link-preview");
-
         if (savedSrc) {
           const parts = extractIdGid(savedSrc);
           if (parts) {
@@ -546,16 +861,12 @@
           input.value = "";
           preview.textContent = "";
         }
-
-        // Thu gọn/mở theo trạng thái lưu
         const collapsed = localStorage.getItem(LS_KEY_COLLAPSED) === "1";
         const body = document.getElementById("sheet-body");
         const btn = document.getElementById("sheet-collapse");
         body.classList.toggle("collapsed", collapsed);
         btn.textContent = collapsed ? "Mở rộng" : "Thu gọn";
       }
-
-      // Toggle thu gọn
       document
         .getElementById("sheet-collapse")
         .addEventListener("click", () => {
@@ -566,14 +877,12 @@
           btn.textContent = next ? "Mở rộng" : "Thu gọn";
           localStorage.setItem(LS_KEY_COLLAPSED, next ? "1" : "0");
         });
-
       async function saveSheetLink(e) {
         e.preventDefault();
         const input = document.getElementById("sheet-input");
         const raw = input.value.trim();
         const parts = extractIdGid(raw);
         const container = document.getElementById("game-container");
-
         if (!parts) {
           alert("Link không hợp lệ. Hãy kiểm tra và thử lại.");
           return false;
@@ -582,18 +891,15 @@
         SHEET_GID = parts.gid || "0";
         localStorage.setItem(LS_KEY_SOURCE, raw);
         updateSheetUI();
-
         await loadData(true);
         container.scrollIntoView({ behavior: "smooth", block: "start" });
         return false;
       }
-
       function clearSavedSheet() {
         localStorage.removeItem(LS_KEY_SOURCE);
         SHEET_ID = null;
         SHEET_GID = "0";
         updateSheetUI();
-
         vocab = [];
         setModeButtonsDisabled(true);
         document.getElementById("hud").classList.add("hidden");
@@ -603,7 +909,6 @@
         document.getElementById("game-container").textContent =
           "Chưa có dữ liệu. Hãy dán link Sheet ở phía trên để bắt đầu.";
       }
-
       function reloadFromSaved() {
         const savedSrc = localStorage.getItem(LS_KEY_SOURCE);
         if (!savedSrc) {
@@ -621,7 +926,6 @@
       }
 
       /* ============== CSV PARSER ============== */
-      // Parser đơn giản, hỗ trợ dấu phẩy, xuống dòng trong ô, và dấu ngoặc kép lặp "".
       function parseCSV(text) {
         const rows = [];
         let row = [],
@@ -634,8 +938,7 @@
               if (text[i + 1] === '"') {
                 cur += '"';
                 i++;
-              } // escaped "
-              else {
+              } else {
                 inQuotes = false;
               }
             } else {
@@ -658,7 +961,6 @@
             }
           }
         }
-        // push cuối
         row.push(cur);
         rows.push(row);
         return rows;
@@ -699,48 +1001,37 @@
             "Chưa có dữ liệu. Hãy dán link Sheet ở phía trên để bắt đầu.";
           return;
         }
-
         setModeButtonsDisabled(true);
         container.innerHTML = `<div>Đang tải dữ liệu từ Google Sheet (CSV)...</div>`;
-
         try {
           const csvUrl = buildCsvUrl(SHEET_ID, SHEET_GID);
           const res = await fetch(csvUrl, { cache: "no-store" });
           if (!res.ok) throw new Error("HTTP " + res.status);
           const text = await res.text();
-
           const table = parseCSV(text);
           if (!table.length) throw new Error("Sheet trống.");
 
-          // Map về {en, vn} chuỗi. Không ép kiểu.
           let parsed = table.map((cols) => {
             const en = (cols[0] ?? "").toString().trim();
             const vn = (cols[1] ?? "").toString().trim();
             return { en, vn };
           });
-
-          // Bỏ dòng tiêu đề nếu có
           if (
             parsed.length &&
             parsed[0].en.toLowerCase() === "en" &&
             parsed[0].vn.toLowerCase() === "vn"
-          ) {
+          )
             parsed.shift();
-          }
-
-          // Lọc dòng hợp lệ: cả A và B đều có gì đó (kể cả số)
           vocab = parsed.filter((x) => x.en !== "" && x.vn !== "");
-
           if (!vocab.length)
             throw new Error("Không có dữ liệu hợp lệ (cột A=en, B=vn).");
 
           container.textContent = `Đã tải ${vocab.length} mục. Chọn chế độ để chơi.`;
-          if (showToast) {
+          if (showToast)
             container.insertAdjacentHTML(
               "beforeend",
               `<div class="sub" style="margin-top:6px;color:var(--muted)">Đã cập nhật dữ liệu từ Sheet.</div>`
             );
-          }
         } catch (e) {
           console.error(e);
           const tip = `Kiểm tra: Share <b>Anyone with the link → Viewer</b>, đúng <b>gid</b>, dữ liệu ở 2 cột đầu (A=en, B=vn).`;
@@ -792,13 +1083,11 @@
         updateProgress();
         nextQuestion();
       }
-
       function updateProgress() {
         const total = pool.length || 1;
         const pct = (completedCount / total) * 100;
         bar.style.width = pct.toFixed(2) + "%";
       }
-
       function nextQuestion() {
         const container = document.getElementById("game-container");
         if (index >= pool.length) {
@@ -813,7 +1102,6 @@
             </div>`;
           return;
         }
-
         current = pool[index++];
         answered = false;
         showingResult = false;
@@ -885,13 +1173,11 @@
               <button id="flash-again" class="btn ghost-btn hidden" onclick="flashAgain()">I forgot (Esc)</button>
             </div>`;
         }
-
         setTimeout(() => {
           const input = document.getElementById("answer");
           if (input) input.focus();
         }, 40);
       }
-
       function renderQuizOptions(choices, correct) {
         return `<div class="options">${choices
           .map(
@@ -994,7 +1280,6 @@
         answered = true;
         showingResult = true;
       }
-
       function retryQuestion() {
         if (completedCount > 0) {
           completedCount--;
@@ -1015,18 +1300,15 @@
         index = Math.max(0, index - 1);
         nextQuestion();
       }
-
       function choose(btn, choice, correct) {
         if (answered) return;
         answered = true;
         showingResult = true;
-
         document
           .querySelectorAll(".quiz-btn")
           .forEach((b) => (b.disabled = true));
         btn.style.borderColor =
           choice === correct ? "var(--success)" : "var(--danger)";
-
         const ok = choice === correct;
         lastOutcome = ok ? "ok" : "bad";
         if (ok) {
@@ -1040,10 +1322,8 @@
           document.getElementById("bad-inline").textContent =
             String(wrongCount);
         }
-
         completedCount = Math.min(completedCount + 1, pool.length);
         updateProgress();
-
         const container = document.getElementById("game-container");
         container.insertAdjacentHTML(
           "beforeend",
@@ -1060,7 +1340,6 @@
             "</div>"
         );
       }
-
       function showFlashAnswer() {
         if (flashShown) return;
         flashShown = true;
