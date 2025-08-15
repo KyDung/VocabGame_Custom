@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vocab Practice Game</title>
+    <meta name="color-scheme" content="light dark" />
+    <style>
+      :root {
+        --bg: #eef6ff;
+        --text: #0f172a;
+        --muted: #475569;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --primary-weak: #dbeafe;
+        --success: #10b981;
+        --danger: #ef4444;
+        --border: #e2e8f0;
+        --option-bg: #f8fafc;
+        --shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+        --accent-1: #60a5fa;
+        --accent-2: #93c5fd;
+      }
+      .dark {
+        --bg: #070b16;
+        --text: #e5e7eb;
+        --muted: #9aa4b2;
+        --card: #0f172a;
+        --primary: #60a5fa;
+        --primary-weak: #0b254a;
+        --success: #34d399;
+        --danger: #f87171;
+        --border: #1f2a3a;
+        --option-bg: #0b1220;
+        --shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+        --accent-1: #3b82f6;
+        --accent-2: #60a5fa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Arial, sans-serif;
+        color: var(--text);
+        background: radial-gradient(
+            800px 400px at 0% 0%,
+            var(--primary-weak),
+            transparent 70%
+          ),
+          radial-gradient(
+            600px 300px at 100% 0%,
+            var(--primary-weak),
+            transparent 70%
+          ),
+          var(--bg);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+      header.hero {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        color: #fff;
+        border-radius: 12px;
+        font-weight: 900;
+        box-shadow: var(--shadow);
+      }
+      h1 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 2px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .btn,
+      .mode-btn,
+      .theme-btn {
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.06s ease, border-color 0.2s, background 0.2s;
+        box-shadow: var(--shadow);
+        font-weight: 700;
+      }
+      .btn:hover,
+      .mode-btn:hover,
+      .theme-btn:hover {
+        transform: translateY(-1px);
+      }
+      .mode-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .chip {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff0;
+        color: var(--text);
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+      .modes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 0 16px;
+      }
+
+      .hud {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .progress {
+        height: 10px;
+        width: 100%;
+        background: #ffffff66;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+        transition: width 0.3s ease;
+      }
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--option-bg);
+        font-weight: 800;
+        font-size: 12px;
+      }
+      .ok {
+        color: var(--success);
+      }
+      .bad {
+        color: var(--danger);
+      }
+
+      .question {
+        font-size: 20px;
+        margin: 8px 0 6px;
+        font-weight: 800;
+      }
+      .prompt {
+        font-size: 22px;
+        font-weight: 900;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      input[type="url"] {
+        width: min(740px, 98%);
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--option-bg);
+        color: var(--text);
+        outline: none;
+        font-size: 16px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      input[type="text"]:focus,
+      input[type="url"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22);
+      }
+
+      .primary-btn {
+        background: linear-gradient(180deg, var(--primary), #1f4fd1);
+        color: #fff;
+        border: 0;
+      }
+      .primary-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+      .primary-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .ghost-btn {
+        background: transparent;
+      }
+
+      .options {
+        display: grid;
+        gap: 10px;
+        max-width: 760px;
+        margin: 14px auto 0;
+      }
+      .quiz-btn {
+        text-align: left;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--option-bg);
+        cursor: pointer;
+        font-size: 16px;
+        transition: transform 0.06s ease, border-color 0.2s;
+        color: var(--text);
+      }
+      .quiz-btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--primary);
+      }
+      .quiz-btn[disabled] {
+        opacity: 0.85;
+        cursor: default;
+        transform: none;
+      }
+
+      .flashcard {
+        margin-top: 16px;
+        padding: 28px 18px;
+        border: 2px dashed var(--primary);
+        border-radius: 16px;
+        display: inline-block;
+        min-width: 280px;
+        background: var(--option-bg);
+      }
+      .flash-front {
+        font-size: 24px;
+        font-weight: 900;
+      }
+      .flash-back {
+        font-size: 18px;
+        margin-top: 12px;
+      }
+      .hidden {
+        display: none;
+      }
+
+      footer {
+        margin-top: 22px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      /* Sheet panel layout */
+      .sheet-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+      }
+      .sheet-body.collapsed {
+        display: none;
+      }
+
+      @media (max-width: 560px) {
+        h1 {
+          font-size: 22px;
+        }
+        .logo {
+          width: 36px;
+          height: 36px;
+        }
+        .modes {
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="hero">
+        <div class="brand">
+          <div class="logo">V</div>
+          <div>
+            <h1>Vocab Practice Game</h1>
+            <div class="sub">
+              EN ⇄ VN • Enter = Submit/Next • Esc = Try Again
+            </div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button
+            id="theme-toggle"
+            class="btn theme-btn"
+            title="Toggle Light/Dark"
+          >
+            🌙 Dark
+          </button>
+        </div>
+      </header>
+
+      <!-- CẤU HÌNH GOOGLE SHEET -->
+      <div class="card" style="margin-bottom: 12px">
+        <div class="sheet-row">
+          <strong>Google Sheet:</strong>
+          <span id="sheet-status" class="chip">Chưa cấu hình</span>
+          <button
+            id="sheet-collapse"
+            class="btn ghost-btn"
+            type="button"
+            title="Thu gọn/mở rộng phần nhập link"
+          >
+            Thu gọn
+          </button>
+        </div>
+        <div class="sub" style="margin-top: 6px">
+          Dán link Google Sheet đã bật <b>Anyone with the link → Viewer</b>. Hỗ
+          trợ link thường (<span class="mono">/edit#gid=</span>), link
+          <span class="mono">gviz</span> hoặc
+          <span class="mono">export?format=csv</span>.
+        </div>
+
+        <div id="sheet-body" class="sheet-body" style="margin-top: 8px">
+          <form
+            id="sheet-form"
+            onsubmit="return saveSheetLink(event)"
+            class="sheet-row"
+          >
+            <input
+              type="url"
+              id="sheet-input"
+              placeholder="https://docs.google.com/spreadsheets/d/......../edit#gid=0"
+              required
+            />
+            <button class="btn primary-btn" type="submit">Lưu link</button>
+            <button
+              class="btn ghost-btn"
+              type="button"
+              onclick="clearSavedSheet()"
+            >
+              Xóa link đã lưu
+            </button>
+            <button
+              class="btn ghost-btn"
+              type="button"
+              onclick="reloadFromSaved()"
+            >
+              Tải lại dữ liệu
+            </button>
+          </form>
+          <div
+            id="link-preview"
+            class="sub mono"
+            style="margin-top: 6px; word-break: break-all"
+          ></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="modes">
+          <button class="mode-btn" onclick="setMode('en-to-vn')">
+            ✍️ EN → VN (Input)
+          </button>
+          <button class="mode-btn" onclick="setMode('vn-to-en')">
+            ✍️ VN → EN (Input)
+          </button>
+          <button class="mode-btn" onclick="setMode('quiz-en')">
+            ✅ Quiz (EN → VN)
+          </button>
+          <button class="mode-btn" onclick="setMode('quiz-vn')">
+            ✅ Quiz (VN → EN)
+          </button>
+          <button class="mode-btn" onclick="setMode('flash-en')">
+            🪪 Flashcard (EN → VN)
+          </button>
+          <button class="mode-btn" onclick="setMode('flash-vn')">
+            🪪 Flashcard (VN → EN)
+          </button>
+          <span class="chip" title="Dữ liệu từ Google Sheets">Live data</span>
+        </div>
+
+        <div id="hud" class="hud hidden">
+          <div class="progress"><div id="bar" class="bar"></div></div>
+          <div class="badges">
+            <div class="badge ok">✔ Correct: <span id="ok">0</span></div>
+            <div class="badge bad">✖ Wrong: <span id="bad">0</span></div>
+          </div>
+        </div>
+
+        <div id="game-card" class="card" style="margin-top: 12px">
+          <div id="game-container">
+            Chưa có dữ liệu. Hãy dán link Sheet ở phía trên để bắt đầu.
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Tip: Bấm <b>Enter</b> để nộp/tiếp • <b>Esc</b> để làm lại •
+        <b>Space</b> để lật flashcard.
+      </footer>
+    </div>
+
+    <script>
+      /* ============== THEME ============== */
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        if (saved === "dark") document.body.classList.add("dark");
+        const btn = document.getElementById("theme-toggle");
+        const update = () => {
+          const dark = document.body.classList.contains("dark");
+          btn.textContent = dark ? "☀️ Light" : "🌙 Dark";
+          btn.title = dark ? "Switch to Light" : "Switch to Dark";
+        };
+        update();
+        btn.addEventListener("click", () => {
+          document.body.classList.toggle("dark");
+          localStorage.setItem(
+            "theme",
+            document.body.classList.contains("dark") ? "dark" : "light"
+          );
+          update();
+        });
+      })();
+
+      /* ============== SHEET LINK / CSV ============== */
+      const LS_KEY_SOURCE = "sheet_source_link"; // link gốc bạn dán
+      const LS_KEY_COLLAPSED = "sheet_panel_collapsed"; // trạng thái thu gọn
+      let SHEET_ID = null,
+        SHEET_GID = "0";
+
+      // Bắt id/gid từ mọi loại link hợp lệ
+      function extractIdGid(raw) {
+        if (!raw) return null;
+        let s = String(raw).trim();
+        if (!/^https?:\/\//i.test(s)) s = "https://" + s;
+        try {
+          const u = new URL(s);
+          if (!/docs\.google\.com$/i.test(u.hostname)) return null;
+
+          const m = u.pathname.match(/\/spreadsheets\/d\/([a-zA-Z0-9\-_]+)/);
+          if (!m) return null;
+          const id = m[1];
+
+          // gid trong query trước, thiếu thì xem hash, cuối cùng mặc định 0
+          let gid = u.searchParams.get("gid") || "0";
+          if (gid === "0" && u.hash) {
+            const m2 = u.hash.match(/gid=(\d+)/);
+            if (m2) gid = m2[1];
+          }
+          return { id, gid };
+        } catch {
+          return null;
+        }
+      }
+
+      // Tạo URL CSV export (tránh ép kiểu cột)
+      function buildCsvUrl(id, gid) {
+        const u = new URL(
+          `https://docs.google.com/spreadsheets/d/${id}/export`
+        );
+        u.searchParams.set("format", "csv");
+        u.searchParams.set("gid", gid || "0");
+        // cache-busting
+        u.searchParams.set("_", Date.now().toString());
+        return u.toString();
+      }
+
+      // Cập nhật UI khối cấu hình
+      function updateSheetUI() {
+        const savedSrc = localStorage.getItem(LS_KEY_SOURCE);
+        const status = document.getElementById("sheet-status");
+        const input = document.getElementById("sheet-input");
+        const preview = document.getElementById("link-preview");
+
+        if (savedSrc) {
+          const parts = extractIdGid(savedSrc);
+          if (parts) {
+            SHEET_ID = parts.id;
+            SHEET_GID = parts.gid || "0";
+          }
+          status.textContent = "Đang dùng link đã lưu";
+          status.style.borderColor = "var(--success)";
+          input.value = savedSrc;
+          preview.textContent = "CSV: " + buildCsvUrl(SHEET_ID, SHEET_GID);
+        } else {
+          SHEET_ID = null;
+          SHEET_GID = "0";
+          status.textContent = "Chưa cấu hình";
+          status.style.borderColor = "var(--border)";
+          input.value = "";
+          preview.textContent = "";
+        }
+
+        // Thu gọn/mở theo trạng thái lưu
+        const collapsed = localStorage.getItem(LS_KEY_COLLAPSED) === "1";
+        const body = document.getElementById("sheet-body");
+        const btn = document.getElementById("sheet-collapse");
+        body.classList.toggle("collapsed", collapsed);
+        btn.textContent = collapsed ? "Mở rộng" : "Thu gọn";
+      }
+
+      // Toggle thu gọn
+      document
+        .getElementById("sheet-collapse")
+        .addEventListener("click", () => {
+          const body = document.getElementById("sheet-body");
+          const btn = document.getElementById("sheet-collapse");
+          const next = !body.classList.contains("collapsed");
+          body.classList.toggle("collapsed", next);
+          btn.textContent = next ? "Mở rộng" : "Thu gọn";
+          localStorage.setItem(LS_KEY_COLLAPSED, next ? "1" : "0");
+        });
+
+      async function saveSheetLink(e) {
+        e.preventDefault();
+        const input = document.getElementById("sheet-input");
+        const raw = input.value.trim();
+        const parts = extractIdGid(raw);
+        const container = document.getElementById("game-container");
+
+        if (!parts) {
+          alert("Link không hợp lệ. Hãy kiểm tra và thử lại.");
+          return false;
+        }
+        SHEET_ID = parts.id;
+        SHEET_GID = parts.gid || "0";
+        localStorage.setItem(LS_KEY_SOURCE, raw);
+        updateSheetUI();
+
+        await loadData(true);
+        container.scrollIntoView({ behavior: "smooth", block: "start" });
+        return false;
+      }
+
+      function clearSavedSheet() {
+        localStorage.removeItem(LS_KEY_SOURCE);
+        SHEET_ID = null;
+        SHEET_GID = "0";
+        updateSheetUI();
+
+        vocab = [];
+        setModeButtonsDisabled(true);
+        document.getElementById("hud").classList.add("hidden");
+        document.getElementById("ok").textContent = "0";
+        document.getElementById("bad").textContent = "0";
+        document.getElementById("bar").style.width = "0%";
+        document.getElementById("game-container").textContent =
+          "Chưa có dữ liệu. Hãy dán link Sheet ở phía trên để bắt đầu.";
+      }
+
+      function reloadFromSaved() {
+        const savedSrc = localStorage.getItem(LS_KEY_SOURCE);
+        if (!savedSrc) {
+          alert("Chưa có link đã lưu.");
+          return;
+        }
+        const parts = extractIdGid(savedSrc);
+        if (!parts) {
+          alert("Link đã lưu không hợp lệ.");
+          return;
+        }
+        SHEET_ID = parts.id;
+        SHEET_GID = parts.gid || "0";
+        loadData(true);
+      }
+
+      /* ============== CSV PARSER ============== */
+      // Parser đơn giản, hỗ trợ dấu phẩy, xuống dòng trong ô, và dấu ngoặc kép lặp "".
+      function parseCSV(text) {
+        const rows = [];
+        let row = [],
+          cur = "",
+          inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          if (inQuotes) {
+            if (ch === '"') {
+              if (text[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } // escaped "
+              else {
+                inQuotes = false;
+              }
+            } else {
+              cur += ch;
+            }
+          } else {
+            if (ch === '"') inQuotes = true;
+            else if (ch === ",") {
+              row.push(cur);
+              cur = "";
+            } else if (ch === "\r") {
+              /* skip */
+            } else if (ch === "\n") {
+              row.push(cur);
+              rows.push(row);
+              row = [];
+              cur = "";
+            } else {
+              cur += ch;
+            }
+          }
+        }
+        // push cuối
+        row.push(cur);
+        rows.push(row);
+        return rows;
+      }
+
+      /* ============== GAME STATE ============== */
+      let vocab = [],
+        mode = "",
+        current = {},
+        answerLang = "",
+        answered = false,
+        showingResult = false,
+        pool = [],
+        index = 0;
+      let flashShown = false,
+        correctCount = 0,
+        wrongCount = 0,
+        lastOutcome = null,
+        completedCount = 0;
+
+      const hud = document.getElementById("hud");
+      const bar = document.getElementById("bar");
+      const okEl = document.getElementById("ok");
+      const badEl = document.getElementById("bad");
+
+      function setModeButtonsDisabled(disabled) {
+        document
+          .querySelectorAll(".mode-btn")
+          .forEach((b) => (b.disabled = disabled));
+      }
+
+      /* ============== LOAD DATA (CSV) ============== */
+      async function loadData(showToast = false) {
+        const container = document.getElementById("game-container");
+        if (!SHEET_ID) {
+          setModeButtonsDisabled(true);
+          container.textContent =
+            "Chưa có dữ liệu. Hãy dán link Sheet ở phía trên để bắt đầu.";
+          return;
+        }
+
+        setModeButtonsDisabled(true);
+        container.innerHTML = `<div>Đang tải dữ liệu từ Google Sheet (CSV)...</div>`;
+
+        try {
+          const csvUrl = buildCsvUrl(SHEET_ID, SHEET_GID);
+          const res = await fetch(csvUrl, { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const text = await res.text();
+
+          const table = parseCSV(text);
+          if (!table.length) throw new Error("Sheet trống.");
+
+          // Map về {en, vn} chuỗi. Không ép kiểu.
+          let parsed = table.map((cols) => {
+            const en = (cols[0] ?? "").toString().trim();
+            const vn = (cols[1] ?? "").toString().trim();
+            return { en, vn };
+          });
+
+          // Bỏ dòng tiêu đề nếu có
+          if (
+            parsed.length &&
+            parsed[0].en.toLowerCase() === "en" &&
+            parsed[0].vn.toLowerCase() === "vn"
+          ) {
+            parsed.shift();
+          }
+
+          // Lọc dòng hợp lệ: cả A và B đều có gì đó (kể cả số)
+          vocab = parsed.filter((x) => x.en !== "" && x.vn !== "");
+
+          if (!vocab.length)
+            throw new Error("Không có dữ liệu hợp lệ (cột A=en, B=vn).");
+
+          container.textContent = `Đã tải ${vocab.length} mục. Chọn chế độ để chơi.`;
+          if (showToast) {
+            container.insertAdjacentHTML(
+              "beforeend",
+              `<div class="sub" style="margin-top:6px;color:var(--muted)">Đã cập nhật dữ liệu từ Sheet.</div>`
+            );
+          }
+        } catch (e) {
+          console.error(e);
+          const tip = `Kiểm tra: Share <b>Anyone with the link → Viewer</b>, đúng <b>gid</b>, dữ liệu ở 2 cột đầu (A=en, B=vn).`;
+          document.getElementById(
+            "game-container"
+          ).innerHTML = `<div style="color:var(--danger);font-weight:700">Lỗi tải Google Sheet: ${e.message}</div><div class="sub">${tip}</div>`;
+          vocab = [];
+        } finally {
+          setModeButtonsDisabled(!vocab.length);
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", async () => {
+        updateSheetUI();
+        const savedSrc = localStorage.getItem(LS_KEY_SOURCE);
+        if (savedSrc) {
+          const parts = extractIdGid(savedSrc);
+          if (parts) {
+            SHEET_ID = parts.id;
+            SHEET_GID = parts.gid || "0";
+            await loadData(false);
+          } else {
+            setModeButtonsDisabled(true);
+          }
+        } else {
+          setModeButtonsDisabled(true);
+        }
+      });
+
+      /* ============== GAME LOGIC ============== */
+      function setMode(selectedMode) {
+        if (!vocab.length) {
+          alert("Chưa có dữ liệu. Hãy cấu hình Google Sheet trước.");
+          return;
+        }
+        mode = selectedMode;
+        answered = false;
+        showingResult = false;
+        pool = shuffle(vocab.slice());
+        index = 0;
+        flashShown = false;
+        correctCount = 0;
+        wrongCount = 0;
+        lastOutcome = null;
+        completedCount = 0;
+        okEl.textContent = "0";
+        badEl.textContent = "0";
+        hud.classList.remove("hidden");
+        updateProgress();
+        nextQuestion();
+      }
+
+      function updateProgress() {
+        const total = pool.length || 1;
+        const pct = (completedCount / total) * 100;
+        bar.style.width = pct.toFixed(2) + "%";
+      }
+
+      function nextQuestion() {
+        const container = document.getElementById("game-container");
+        if (index >= pool.length) {
+          container.innerHTML = `
+            <div style="font-size:20px;font-weight:900;margin-top:6px;">🎉 You've finished all ${
+              mode.startsWith("flash") ? "items" : "questions"
+            }!</div>
+            <div class="sub" style="margin-top:6px">Score • ✔ ${correctCount} — ✖ ${wrongCount}</div>
+            <div style="margin-top:10px">
+              <button class="btn primary-btn" onclick="setMode(mode)">Play Again</button>
+              <button class="btn ghost-btn" onclick="document.getElementById('game-container').innerHTML='Chọn chế độ để bắt đầu.'; document.getElementById('hud').classList.add('hidden')">Return to Menu</button>
+            </div>`;
+          return;
+        }
+
+        current = pool[index++];
+        answered = false;
+        showingResult = false;
+        flashShown = false;
+        lastOutcome = null;
+        container.innerHTML = "";
+        updateProgress();
+
+        const head = `
+          <div class="hud">
+            <div><b>${
+              mode.startsWith("flash") ? "Item" : "Question"
+            }</b> ${index}/${pool.length}</div>
+            <div class="badges">
+              <div class="badge ok">✔ <span id="ok-inline">${correctCount}</span></div>
+              <div class="badge bad">✖ <span id="bad-inline">${wrongCount}</span></div>
+            </div>
+          </div>`;
+
+        if (mode === "en-to-vn") {
+          answerLang = "vn";
+          container.innerHTML =
+            head +
+            `
+            <div class="question">Translate to Vietnamese</div>
+            <div class="prompt">${escapeHtml(current.en)}</div>
+            <input type="text" id="answer" autocomplete="off"/>
+            <div style="margin-top:8px"><button id="submit-btn" class="btn primary-btn" onclick="checkAnswer('vn')">Submit (Enter)</button></div>`;
+        } else if (mode === "vn-to-en") {
+          answerLang = "en";
+          container.innerHTML =
+            head +
+            `
+            <div class="question">Translate to English</div>
+            <div class="prompt">${escapeHtml(current.vn)}</div>
+            <input type="text" id="answer" autocomplete="off"/>
+            <div style="margin-top:8px"><button id="submit-btn" class="btn primary-btn" onclick="checkAnswer('en')">Submit (Enter)</button></div>`;
+        } else if (mode === "quiz-en") {
+          const choices = shuffle(getOptions("vn", current.vn));
+          container.innerHTML =
+            head +
+            `
+            <div class="question">What is the meaning of</div>
+            <div class="prompt">${escapeHtml(current.en)}</div>
+            ${renderQuizOptions(choices, current.vn)}`;
+        } else if (mode === "quiz-vn") {
+          const choices = shuffle(getOptions("en", current.en));
+          container.innerHTML =
+            head +
+            `
+            <div class="question">What is the English of</div>
+            <div class="prompt">${escapeHtml(current.vn)}</div>
+            ${renderQuizOptions(choices, current.en)}`;
+        } else if (mode === "flash-en" || mode === "flash-vn") {
+          const front = mode === "flash-en" ? current.en : current.vn;
+          const back = mode === "flash-en" ? current.vn : current.en;
+          container.innerHTML =
+            head +
+            `
+            <div class="flashcard">
+              <div class="flash-front">${escapeHtml(front)}</div>
+              <div id="flash-back" class="flash-back hidden">${escapeHtml(
+                back
+              )}</div>
+            </div>
+            <div style="margin-top:12px">
+              <button id="flash-show" class="btn primary-btn" onclick="showFlashAnswer()">Show Answer (Space)</button>
+              <button id="flash-know" class="btn ghost-btn hidden" onclick="flashKnow()">I knew it (Enter)</button>
+              <button id="flash-again" class="btn ghost-btn hidden" onclick="flashAgain()">I forgot (Esc)</button>
+            </div>`;
+        }
+
+        setTimeout(() => {
+          const input = document.getElementById("answer");
+          if (input) input.focus();
+        }, 40);
+      }
+
+      function renderQuizOptions(choices, correct) {
+        return `<div class="options">${choices
+          .map(
+            (v) =>
+              `<button class="quiz-btn" onclick="choose(this,'${escapeAttr(
+                v
+              )}','${escapeAttr(correct)}')">${escapeHtml(v)}</button>`
+          )
+          .join("")}</div>`;
+      }
+
+      // Hotkeys
+      document.addEventListener("keydown", (e) => {
+        if (!mode) return;
+        if (mode.startsWith("flash")) {
+          if (e.code === "Space") {
+            e.preventDefault();
+            if (!flashShown) showFlashAnswer();
+          } else if (e.key === "Enter") {
+            if (flashShown) {
+              e.preventDefault();
+              flashKnow();
+            }
+          } else if (e.key === "Escape") {
+            if (flashShown) {
+              e.preventDefault();
+              flashAgain();
+            }
+          }
+          return;
+        }
+        if (e.key === "Enter") {
+          const input = document.getElementById("answer");
+          if (!answered) {
+            if (input) {
+              e.preventDefault();
+              checkAnswer(answerLang);
+            }
+          } else if (showingResult) {
+            e.preventDefault();
+            nextQuestion();
+          }
+        } else if (e.key === "Escape") {
+          if (showingResult) {
+            e.preventDefault();
+            retryQuestion();
+          }
+        }
+      });
+
+      function checkAnswer(lang) {
+        if (answered) return;
+        const inputElem = document.getElementById("answer");
+        const submitBtn = document.getElementById("submit-btn");
+        const input = (inputElem && inputElem.value ? inputElem.value : "")
+          .trim()
+          .toLowerCase();
+        const correct = (current[lang] || "").toLowerCase();
+        const ok = input === correct;
+
+        lastOutcome = ok ? "ok" : "bad";
+        if (ok) {
+          correctCount++;
+          okEl.textContent = String(correctCount);
+          document.getElementById("ok-inline").textContent =
+            String(correctCount);
+        } else {
+          wrongCount++;
+          badEl.textContent = String(wrongCount);
+          document.getElementById("bad-inline").textContent =
+            String(wrongCount);
+        }
+
+        completedCount = Math.min(completedCount + 1, pool.length);
+        updateProgress();
+
+        const container = document.getElementById("game-container");
+        container.insertAdjacentHTML(
+          "beforeend",
+          '<div class="result ' +
+            (ok ? "ok" : "bad") +
+            '" style="margin-top:10px;font-weight:900">' +
+            (ok
+              ? "✅ Correct!"
+              : "❌ Incorrect. Correct answer: " + escapeHtml(current[lang])) +
+            "</div>" +
+            '<div style="margin-top:6px">' +
+            '<button class="btn primary-btn" onclick="nextQuestion()">Next (Enter)</button>' +
+            '<button class="btn ghost-btn" onclick="retryQuestion()">Try Again (Esc)</button>' +
+            "</div>"
+        );
+
+        if (inputElem) {
+          inputElem.disabled = true;
+          inputElem.blur();
+        }
+        if (submitBtn) {
+          submitBtn.disabled = true;
+        }
+        answered = true;
+        showingResult = true;
+      }
+
+      function retryQuestion() {
+        if (completedCount > 0) {
+          completedCount--;
+          updateProgress();
+        }
+        if (lastOutcome === "ok") {
+          correctCount--;
+          okEl.textContent = String(correctCount);
+          document.getElementById("ok-inline").textContent =
+            String(correctCount);
+        } else if (lastOutcome === "bad") {
+          wrongCount--;
+          badEl.textContent = String(wrongCount);
+          document.getElementById("bad-inline").textContent =
+            String(wrongCount);
+        }
+        lastOutcome = null;
+        index = Math.max(0, index - 1);
+        nextQuestion();
+      }
+
+      function choose(btn, choice, correct) {
+        if (answered) return;
+        answered = true;
+        showingResult = true;
+
+        document
+          .querySelectorAll(".quiz-btn")
+          .forEach((b) => (b.disabled = true));
+        btn.style.borderColor =
+          choice === correct ? "var(--success)" : "var(--danger)";
+
+        const ok = choice === correct;
+        lastOutcome = ok ? "ok" : "bad";
+        if (ok) {
+          correctCount++;
+          okEl.textContent = String(correctCount);
+          document.getElementById("ok-inline").textContent =
+            String(correctCount);
+        } else {
+          wrongCount++;
+          badEl.textContent = String(wrongCount);
+          document.getElementById("bad-inline").textContent =
+            String(wrongCount);
+        }
+
+        completedCount = Math.min(completedCount + 1, pool.length);
+        updateProgress();
+
+        const container = document.getElementById("game-container");
+        container.insertAdjacentHTML(
+          "beforeend",
+          '<div class="result ' +
+            (ok ? "ok" : "bad") +
+            '" style="margin-top:10px;font-weight:900">' +
+            (ok
+              ? "✅ Correct!"
+              : "❌ Incorrect. Correct answer: " + escapeHtml(correct)) +
+            "</div>" +
+            '<div style="margin-top:6px">' +
+            '<button class="btn primary-btn" onclick="nextQuestion()">Next (Enter)</button>' +
+            '<button class="btn ghost-btn" onclick="retryQuestion()">Try Again (Esc)</button>' +
+            "</div>"
+        );
+      }
+
+      function showFlashAnswer() {
+        if (flashShown) return;
+        flashShown = true;
+        var back = document.getElementById("flash-back");
+        var show = document.getElementById("flash-show");
+        var know = document.getElementById("flash-know");
+        var again = document.getElementById("flash-again");
+        if (back) back.classList.remove("hidden");
+        if (show) show.classList.add("hidden");
+        if (know) know.classList.remove("hidden");
+        if (again) again.classList.remove("hidden");
+      }
+      function flashKnow() {
+        completedCount = Math.min(completedCount + 1, pool.length);
+        updateProgress();
+        nextQuestion();
+      }
+      function flashAgain() {
+        if (index > 0) index--;
+        nextQuestion();
+      }
+
+      function getOptions(field, correct) {
+        var options = [correct];
+        var poolVals = vocab.map((v) => v[field]).filter(Boolean);
+        while (options.length < 4 && options.length < poolVals.length) {
+          var item = poolVals[Math.floor(Math.random() * poolVals.length)];
+          if (!options.includes(item)) options.push(item);
+        }
+        return shuffle(options);
+      }
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = a[i];
+          a[i] = a[j];
+          a[j] = tmp;
+        }
+        return a;
+      }
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      function escapeAttr(str) {
+        return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+      }
+    </script>
+  </body>
+</html>
